@@ -26,7 +26,40 @@ final valueProvider = Provider<int>((ref) {
   return 36;
 });
 
+final counterStateProvider = StateProvider<int>((ref) {
+  return 0;
+});
+
 class MyHomePage extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final counter = ref.watch(counterStateProvider);
+    ref.listen(
+      counterStateProvider,
+      (StateController<int> counterState) {
+        // note: this callback executes when the provider value changes,
+        // not when the build method is called
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Value is ${counterState.state}')),
+        );
+      },
+    );
+    return Scaffold(
+      body: Center(
+        child: Text(
+          'Value: ${counter.state}',
+          style: Theme.of(context).textTheme.headline4,
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => ref.read(counterStateProvider).state++,
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+/*class MyHomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final value = ref.watch(valueProvider);
@@ -39,9 +72,9 @@ class MyHomePage extends ConsumerWidget {
       ),
     );
   }
-}
+}*/
 
-/*// 1. Extend [ConsumerStatefulWidget]
+/*
 class MyHomePage extends ConsumerStatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
 
@@ -49,19 +82,16 @@ class MyHomePage extends ConsumerStatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-// 2. Extend [ConsumerState]
 class _MyHomePageState extends ConsumerState<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    // 3. use ref.read() in the widget life-cycle methods
     final value = ref.read(valueProvider);
     print(value);
   }
 
   @override
   Widget build(BuildContext context) {
-    // 3. use ref.watch() to get the value of the provider
     final value = ref.watch(valueProvider);
     return Scaffold(
       body: Center(
